@@ -82,8 +82,8 @@ $barang_list_result = $conn->query($barang_list_query);
 <aside id="sidebar" class="fixed top-16 left-0 h-full w-64 bg-white border-r shadow-sm z-40 transform -translate-x-full sidebar-lg:translate-x-0 transition-transform duration-300">
     <nav class="mt-4 px-4 space-y-2">
         <a href="dashboard_admin.php" class="block py-2 px-4 rounded bg-gray-100 text-gray-800">📊 Dashboard</a>
-        <a href="barang/list.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-green-600">📦 Kelola Barang</a>
-        <a href="kategori/list.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-green-600">🏷️ Kelola Kategori</a>
+        <a href="barang/list.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-gray-600">📦 Kelola Barang</a>
+        <a href="kategori/list.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-gray-600">🏷️ Kelola Kategori</a>
         <a href="logout.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-red-600">🔓 Logout</a>
     </nav>
 </aside>
