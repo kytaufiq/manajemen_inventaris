@@ -1,6 +1,6 @@
 <?php
 require 'auth.php';
-require 'koneksi.php'; // pastikan path ke file koneksi sesuai
+require 'koneksi.php'; 
 
 if ($_SESSION['role'] != 'user') {
     header("Location: dashboard_admin.php");
@@ -89,7 +89,7 @@ $total_stok = $stok_result->fetch_assoc()['total_stok'] ?? 0;
                             Filter berdasarkan kategori
                         </div>
                     </div>
-                    <a href="barang/list.php" 
+                    <a href="list.php" 
                        class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
