@@ -56,7 +56,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-image: url('img/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
         .login-container {
             min-height: 100vh;
@@ -83,6 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #888;
         }
     </style>
+
 </head>
 <body>
 <div class="container-fluid login-container d-flex justify-content-center align-items-center">

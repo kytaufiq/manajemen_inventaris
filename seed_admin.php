@@ -1,7 +1,7 @@
 <?php
 require 'koneksi.php';
 
-$username = 'soraa';
+$username = 'zaky rahman';
 $password = 'admin123'; 
 $role = 'admin';
 

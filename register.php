@@ -50,6 +50,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Register - Inventaris</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+        <style>
+        body {
+            background-image: url('img/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .login-container {
+            min-height: 100vh;
+        }
+        .left-box {
+            background-color: #fff;
+            padding: 40px;
+            border-right: 1px solid #ddd;
+        }
+        .right-box {
+            padding: 40px;
+        }
+        .app-title {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .app-desc {
+            margin-top: 20px;
+            font-size: 15px;
+            color: #555;
+        }
+        footer {
+            font-size: 13px;
+            color: #888;
+        }
+    </style>
 </head>
 <body class="bg-light d-flex justify-content-center align-items-center" style="height: 100vh;">
 <div class="card p-4 shadow" style="width: 400px;">

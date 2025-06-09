@@ -1,23 +1,29 @@
 <?php
 require 'auth.php';
-require 'koneksi.php'; // pastikan file koneksi sudah benar
+require 'koneksi.php';
 
 if ($_SESSION['role'] != 'admin') {
     header("Location: dashboard_user.php");
     exit;
 }
 
-// Ambil total barang
 $barang_result = $conn->query("SELECT COUNT(*) AS total_barang FROM barang");
 $total_barang = $barang_result->fetch_assoc()['total_barang'];
 
-// Ambil total kategori
 $kategori_result = $conn->query("SELECT COUNT(*) AS total_kategori FROM kategori");
 $total_kategori = $kategori_result->fetch_assoc()['total_kategori'];
 
-// Ambil total stok
 $stok_result = $conn->query("SELECT SUM(stok) AS total_stok FROM barang");
 $total_stok = $stok_result->fetch_assoc()['total_stok'] ?? 0;
+
+
+$barang_list_query = "
+    SELECT b.id, b.nama_barang, b.stok, b.harga, k.nama_kategori 
+    FROM barang b 
+    LEFT JOIN kategori k ON b.kategori_id = k.id 
+    ORDER BY b.nama_barang ASC
+";
+$barang_list_result = $conn->query($barang_list_query);
 ?>
 
 <!DOCTYPE html>
@@ -25,139 +31,195 @@ $total_stok = $stok_result->fetch_assoc()['total_stok'] ?? 0;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
+    <title>Barangku - Dashboard Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    screens: {
+                        'sidebar-lg': '1024px',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-        <div class="max-w-6xl mx-auto px-6 py-4">
+
+<!-- Header -->
+<header class="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
+    <div class="px-4 sm:px-6 py-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-3">               
+                <img src="img/logo.png" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-full shadow" />
+                <h1 class="text-xl sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-pink-500 drop-shadow-sm tracking-wide">
+                    Barangku
+                </h1>
+            </div>
+
+            
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <span class="text-gray-600 text-sm sm:text-base hidden sm:block font-semibold">
+                <?= $_SESSION['username'] ?>
+                </span>
+            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 text-sm font-semibold">
+                <?= strtoupper(substr($_SESSION['username'], 0, 1)) ?><?= strtoupper(explode(' ', $_SESSION['username'])[1][0] ?? '') ?>
+            </div>
+          </div>
+        </div>
+    </div>
+</header>
+
+<!-- Mobile Menu Button -->
+<button id="mobile-menu-btn" class="fixed top-4 left-4 z-60 sidebar-lg:hidden bg-white p-2 rounded shadow-md">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+</button>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-16 left-0 h-full w-64 bg-white border-r shadow-sm z-40 transform -translate-x-full sidebar-lg:translate-x-0 transition-transform duration-300">
+    <nav class="mt-4 px-4 space-y-2">
+        <a href="dashboard_admin.php" class="block py-2 px-4 rounded bg-gray-100 text-gray-800">📊 Dashboard</a>
+        <a href="barang/list.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-green-600">📦 Kelola Barang</a>
+        <a href="kategori/list.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-green-600">🏷️ Kelola Kategori</a>
+        <a href="logout.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-red-600">🔓 Logout</a>
+    </nav>
+</aside>
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden sidebar-lg:hidden"></div>
+
+<!-- Main Content -->
+<main class="pt-20 pb-8 px-4 sm:px-6 lg:px-8 sidebar-lg:ml-64 max-w-7xl mx-auto sidebar-lg:max-w-none">
+    <div class="mb-6 sm:mb-8">
+        <h2 class="text-lg sm:text-xl font-medium text-gray-700 mb-2">Dashboard Admin </h2>
+        <p class="text-sm sm:text-base text-gray-500">Pantau inventori dan kelola sistem dengan mudah</p>
+    </div>
+
+    <!-- Ringkasan Sistem -->
+    <div class="mb-8">
+        <h3 class="text-base sm:text-lg font-medium text-gray-800 mb-4">Ringkasan Sistem</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <!-- Total Barang -->
+            <div class="bg-white rounded-lg shadow-sm border p-4 sm:p-6 text-center hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+                <div class="text-2xl sm:text-3xl font-bold text-blue-600 mb-2"><?= $total_barang ?></div>
+                <div class="text-sm text-gray-600">Total Barang</div>
+            </div>
+            
+            <!-- Total Kategori -->
+            <div class="bg-white rounded-lg shadow-sm border p-4 sm:p-6 text-center hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                </div>
+                <div class="text-2xl sm:text-3xl font-bold text-green-600 mb-2"><?= $total_kategori ?></div>
+                <div class="text-sm text-gray-600">Total Kategori</div>
+            </div>
+            
+            <!-- Total Stok -->
+            <div class="bg-white rounded-lg shadow-sm border p-4 sm:p-6 text-center hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div class="text-2xl sm:text-3xl font-bold text-orange-600 mb-2"><?= number_format($total_stok) ?></div>
+                <div class="text-sm text-gray-600">Total Stok</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daftar Barang -->
+    <div class="bg-white rounded-lg shadow-sm border">
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
             <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-semibold text-gray-800">Dashboard Admin</h1>
-                <div class="flex items-center space-x-4">
-                    <span class="text-gray-600">Halo, <?= $_SESSION['username'] ?></span>
-                    <a href="logout.php" 
-                       class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm transition-colors">
-                        Logout
-                    </a>
-                </div>
+                <h3 class="text-base sm:text-lg font-medium text-gray-800">Daftar Barang</h3>
+                <a href="barang/list.php" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    Lihat Semua →
+                </a>
             </div>
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-6 py-8">
-        <!-- Welcome Message -->
-        <div class="mb-8">
-            <h2 class="text-xl font-medium text-gray-700 mb-2">Selamat datang di Panel Admin</h2>
-            <p class="text-gray-500">Kelola sistem Anda dengan mudah melalui menu di bawah ini</p>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            No
+                        </th>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Nama Barang
+                        </th>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Kategori
+                        </th>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Stok
+                        </th>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Harga
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <?php if ($barang_list_result->num_rows > 0): ?>
+                        <?php $no = 1; ?>
+                        <?php while ($row = $barang_list_result->fetch_assoc()): ?>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <?= $no++ ?>
+                                </td>
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($row['nama_barang']) ?></div>
+                                </td>
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <?= htmlspecialchars($row['nama_kategori'] ?? 'Tanpa Kategori') ?>
+                                    </span>
+                                </td>
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm text-gray-900 
+                                        <?= $row['stok'] <= 10 ? 'text-red-600 font-semibold' : ($row['stok'] <= 20 ? 'text-yellow-600 font-medium' : 'text-green-600') ?>">
+                                        <?= $row['stok'] ?>
+                                        <?php if ($row['stok'] <= 10): ?>
+                                            <span class="text-xs text-red-500 ml-1">(Stok Rendah)</span>
+                                        <?php elseif ($row['stok'] <= 20): ?>
+                                            <span class="text-xs text-yellow-500 ml-1">(Stok Terbatas)</span>
+                                        <?php endif; ?>
+                                    </span>
+                                </td>
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    Rp <?= number_format($row['harga'], 0, ',', '.') ?>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="px-4 sm:px-6 py-8 text-center text-gray-500">
+                                <div class="flex flex-col items-center">
+                                    <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                    </svg>
+                                    <p class="text-sm text-gray-500">Belum ada barang tersedia</p>
+                                    <a href="barang/list.php" class="mt-2 text-blue-600 hover:text-blue-800 text-sm">
+                                        Tambah Barang Pertama
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
+    </div>
+</main>
 
-        <!-- Management Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Card Manajemen Barang -->
-            <div class="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-                <div class="p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-800">Manajemen Barang</h3>
-                            <p class="text-gray-500 text-sm">Kelola data barang dan inventori</p>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-2 mb-6">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                            Tambah dan edit barang
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                            Monitor stok barang
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                            Laporan inventori
-                        </div>
-                    </div>
-                    
-                    <a href="barang/list.php" 
-                       class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded text-center block transition-colors">
-                        Kelola Barang
-                    </a>
-                </div>
-            </div>
-
-            <!-- Card Manajemen Kategori -->
-            <div class="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-                <div class="p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-800">Manajemen Kategori</h3>
-                            <p class="text-gray-500 text-sm">Kelola kategori dan klasifikasi</p>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-2 mb-6">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></span>
-                            Buat kategori baru
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></span>
-                            Organisasi kategori
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></span>
-                            Filter dan pencarian
-                        </div>
-                    </div>
-                    
-                    <a href="kategori/list.php" 
-                       class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded text-center block transition-colors">
-                        Kelola Kategori
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="mt-12">
-            <h3 class="text-lg font-medium text-gray-800 mb-4">Ringkasan Sistem</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Total Barang -->
-                <div class="bg-white rounded-lg shadow-sm border p-6 text-center">
-                    <div class="text-2xl font-bold text-blue-600 mb-2"><?= $total_barang ?></div>
-                    <div class="text-sm text-gray-600">Total Barang</div>
-                </div>
-                <!-- Total Kategori -->
-                <div class="bg-white rounded-lg shadow-sm border p-6 text-center">
-                    <div class="text-2xl font-bold text-green-600 mb-2"><?= $total_kategori ?></div>
-                    <div class="text-sm text-gray-600">Total Kategori</div>
-                </div>
-                <!-- Total Stok -->
-                <div class="bg-white rounded-lg shadow-sm border p-6 text-center">
-                    <div class="text-2xl font-bold text-orange-600 mb-2"><?= $total_stok ?></div>
-                    <div class="text-sm text-gray-600">Total Stok</div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="mt-16 py-6 border-t bg-white">
-        <div class="max-w-6xl mx-auto px-6 text-center text-gray-500 text-sm">
-            All Rights Reserved | © App Inventaris Barang - 2025
-        </div>
-    </footer>
 </body>
 </html>
