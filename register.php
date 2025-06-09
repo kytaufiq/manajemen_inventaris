@@ -52,12 +52,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
         <style>
-        body {
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-image: url('img/background.png');
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            filter: blur(2px);
+            z-index: -1;
         }
         .login-container {
             min-height: 100vh;
@@ -110,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
         <button class="btn btn-primary w-100">Daftar</button>
 
-        <!-- Tombol seperti pada gambar kiri: text biasa dengan link -->
+        
         <div class="text-center mt-2">
             Sudah punya akun? <a href="index.php" class="text-primary">Masuk</a>
         </div>
