@@ -2,7 +2,6 @@
 require 'auth.php';
 require 'koneksi.php';
 
-// Pastikan hanya user yang bisa akses
 if ($_SESSION['role'] != 'user') {
     header("Location: ../dashboard_admin.php");
     exit;

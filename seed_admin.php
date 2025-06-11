@@ -5,10 +5,10 @@ $username = 'zaky rahman';
 $password = 'admin123'; 
 $role = 'admin';
 
-// Hash password-nya
+
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-// Cek jika user sudah ada
+
 $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
