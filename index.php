@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <style>
-        body::before {
+       body::before {
             content: "";
             position: fixed;
             top: 0;
@@ -66,19 +66,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background-size: cover;
             background-position: center;
             filter: blur(2px);
-            z-index: -1;
+            z-index: -1; 
         }
+
         .login-container {
             min-height: 100vh;
         }
-        .left-box {
-            background-color: #fff;
-            padding: 40px;
-            border-right: 1px solid #ddd;
-        }
-        .right-box {
-            padding: 40px;
-        }
+       
         .app-title {
             font-size: 28px;
             font-weight: bold;
@@ -92,13 +86,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-size: 13px;
             color: #888;
         }
+       .left-box, .right-box {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            color: #000; 
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
         
     </style>
 
 </head>
 <body>
 <div class="container-fluid login-container d-flex justify-content-center align-items-center">
-    <div class="row shadow rounded bg-white" style="max-width: 900px; width: 100%;">
+    <div class="row shadow rounded" style="max-width: 900px; width: 100%;">
         <div class="col-md-6 left-box d-flex flex-column justify-content-center align-items-center text-center">
             <img src="img/logo.png" alt="Logo" style="width: 120px;">
             <div class="app-title mt-3">Barangku</div>
