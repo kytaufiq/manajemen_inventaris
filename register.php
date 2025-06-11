@@ -89,10 +89,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-size: 13px;
             color: #888;
         }
+        .card label,
+        .card a {
+            color: #fff;
+        }
+
+        .card input::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
     </style>
 </head>
 <body class="bg-light d-flex justify-content-center align-items-center" style="height: 100vh;">
-<div class="card p-4 shadow" style="width: 400px;">
+    <div class="card p-4 shadow" style="width: 400px;
+        background-color: rgba(255, 255, 255, 0.25); 
+        backdrop-filter: blur(10px); 
+        -webkit-backdrop-filter: blur(10px); 
+        border-radius: 16px;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);">
+
     <h3 class="text-center mb-3">Register Akun</h3>
 
     <?php if ($error): ?>
