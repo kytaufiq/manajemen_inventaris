@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <style>
-       body::before {
+        body::before {
             content: "";
             position: fixed;
             top: 0;
@@ -72,32 +72,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .login-container {
             min-height: 100vh;
         }
-       
+
+        .left-box, .right-box {
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
         .app-title {
             font-size: 28px;
             font-weight: bold;
         }
+
         .app-desc {
             margin-top: 20px;
             font-size: 15px;
             color: #555;
         }
+
         footer {
             font-size: 13px;
             color: #888;
         }
-       .left-box, .right-box {
-            background-color: rgba(255, 255, 255, 0.2) !important;
-            color: #000; 
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
-            border-radius: 10px;
-            padding: 40px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-        
     </style>
-
 </head>
 <body>
 <div class="container-fluid login-container d-flex justify-content-center align-items-center">
@@ -125,14 +125,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 <button class="btn btn-primary w-100">Login 🔐</button>
             </form>
-            <div class="text-center mt-3">
-                <small>Belum punya akun? <a href="register.php">Daftar di sini</a></small>
-            </div>
-        </div>
-        <div class="text-center mt-3 p-2">
-            <footer>
-                All Rights Reserved | © App Inventaris Barang - 2025
-            </footer>
+           <div class="text-center mt-3">
+                    <small>Belum punya akun? <a href="register.php">Daftar di sini</a></small>
+                </div>
+                <footer class="text-center mt-4 w-100">
+                    All Rights Reserved | © App Inventaris Barang - 2025
+                </footer>
+
         </div>
     </div>
 </div>
