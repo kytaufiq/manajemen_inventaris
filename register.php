@@ -48,95 +48,131 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Register - Inventaris</title>
+    <title>Register - App Inventaris Barang</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-
-        <style>
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        body {
             background-image: url('img/background.png');
             background-size: cover;
             background-position: center;
-            filter: blur(2px);
-            z-index: -1;
-        }
-        .login-container {
+            background-repeat: no-repeat;
             min-height: 100vh;
         }
-        .left-box {
-            background-color: #fff;
-            padding: 40px;
-            border-right: 1px solid #ddd;
+
+        .register-container {
+            min-height: 100vh;
+            padding: 20px 0;
         }
-        .right-box {
-            padding: 40px;
-        }
+
         .app-title {
             font-size: 28px;
             font-weight: bold;
         }
+
         .app-desc {
             margin-top: 20px;
             font-size: 15px;
             color: #555;
         }
-        footer {
+
+        .main-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .left-box, .right-box {
+            padding: 40px;
+        }
+
+        .left-box {
+            background-color: #ffffff;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .right-box {
+            background-color: #ffffff;
+            color: #000;
+        }
+
+        .footer-section {
+            background-color: #f8f9fa;
+            color: #666;
+            text-align: center;
+            padding: 15px;
             font-size: 13px;
-            color: #888;
-        }
-        .card label,
-        .card a {
-            color: #fff;
+            border-top: 1px solid #dee2e6;
         }
 
-        .card input::placeholder {
-            color: rgba(255, 255, 255, 0.8);
+        @media (max-width: 768px) {
+            .register-container {
+                padding: 10px;
+            }
+            
+            .left-box, .right-box {
+                padding: 30px 20px;
+            }
         }
-
     </style>
 </head>
-<body class="bg-light d-flex justify-content-center align-items-center" style="height: 100vh;">
-    <div class="card p-4 shadow" style="width: 400px;
-        background-color: rgba(255, 255, 255, 0.25); 
-        backdrop-filter: blur(10px); 
-        -webkit-backdrop-filter: blur(10px); 
-        border-radius: 16px;
-        color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.3);">
+<body>
+<div class="container-fluid register-container d-flex justify-content-center align-items-center">
+    <div class="main-card">
+        <div class="row g-0">
+            <div class="col-md-6 left-box">
+                <img src="img/logo.png" alt="Logo" style="width: 120px;">
+                <div class="app-title mt-3">Barangku</div>
+                <div class="app-desc mt-3">
+                    Barangku merupakan software untuk mengelola, memantau, dan mencatat data barang secara efisien di lingkungan kantor, baik instansi pemerintah maupun swasta.
+                </div>
+            </div>
+            <div class="col-md-6 right-box">
+                <h4 class="mb-4 text-center">📝 <strong>Register Akun</strong></h4>
+                
+                <?php if ($error): ?>
+                    <div class="alert alert-danger"><?= $error ?></div>
+                <?php elseif ($success): ?>
+                    <div class="alert alert-success"><?= $success ?></div>
+                <?php endif; ?>
 
-    <h3 class="text-center mb-3">Register Akun</h3>
-
-    <?php if ($error): ?>
-        <div class="alert alert-danger"><?= $error ?></div>
-    <?php elseif ($success): ?>
-        <div class="alert alert-success"><?= $success ?></div>
-    <?php endif; ?>
-
-    <form method="POST">
-        <div class="mb-3">
-            <label>Username</label>
-            <input type="text" name="username" class="form-control" required>
+                <form method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" name="username" class="form-control" placeholder="Username" required>
+                    </div>
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                        <input type="password" name="confirm_password" class="form-control" placeholder="Konfirmasi Password" required>
+                    </div>
+                    <button class="btn btn-success w-100">Daftar 📝</button>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <small>Sudah punya akun? <a href="index.php">Masuk di sini</a></small>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label>Password</label>
-            <input type="password" name="password" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label>Konfirmasi Password</label>
-            <input type="password" name="confirm_password" class="form-control" required>
-        </div>
-        <button class="btn btn-primary w-100">Daftar</button>
-
         
-        <div class="text-center mt-2">
-            Sudah punya akun? <a href="index.php" class="text-primary">Masuk</a>
+        <!-- Footer terintegrasi dalam card utama -->
+        <div class="footer-section">
+            All Rights Reserved | © App Inventaris Barang - 2025
         </div>
-    </form>
+    </div>
 </div>
+
+<script src="js/script.js"></script>
 </body>
 </html>
