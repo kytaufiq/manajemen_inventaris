@@ -7,6 +7,35 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
+// Deteksi halaman aktif berdasarkan nama file atau parameter
+$current_page = basename($_SERVER['PHP_SELF']);
+$active_menu = '';
+
+// Tentukan menu aktif berdasarkan halaman
+switch($current_page) {
+    case 'dashboard_admin.php':
+        $active_menu = 'dashboard';
+        break;
+    case 'list.php':
+        // Cek apakah ini dari folder barang atau kategori
+        if (strpos($_SERVER['REQUEST_URI'], 'barang') !== false) {
+            $active_menu = 'barang';
+        } elseif (strpos($_SERVER['REQUEST_URI'], 'kategori') !== false) {
+            $active_menu = 'kategori';
+        }
+        break;
+    case 'tambah.php':
+    case 'edit.php':
+    case 'hapus.php':
+        // Untuk halaman tambah/edit/hapus, cek folder
+        if (strpos($_SERVER['REQUEST_URI'], 'barang') !== false) {
+            $active_menu = 'barang';
+        } elseif (strpos($_SERVER['REQUEST_URI'], 'kategori') !== false) {
+            $active_menu = 'kategori';
+        }
+        break;
+}
+
 $result = $conn->query("SELECT * FROM kategori");
 ?>
 
@@ -57,13 +86,45 @@ $result = $conn->query("SELECT * FROM kategori");
 <!-- Sidebar -->
 <aside id="sidebar" class="fixed top-16 left-0 h-full w-64 bg-white border-r shadow-sm z-40 transform -translate-x-full sidebar-lg:translate-x-0 transition-transform duration-300">
     <nav class="mt-4 px-4 space-y-2">
-        <a href="../dashboard_admin.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-gray-800">📊 Dashboard</a>
-        <a href="../barang/list.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-green-600">📦 Kelola Barang</a>
-        <a href="list.php" class="block py-2 px-4 rounded bg-gray-100 text-green-600">🏷️ Kelola Kategori</a>
-        <a href="../logout.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-red-600">🔓 Logout</a>
+        <!-- Dashboard Menu -->
+        <a href="../dashboard_admin.php" class="block py-3 px-4 rounded-lg transition-all duration-200 
+            <?= $active_menu == 'dashboard' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500 font-semibold shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' ?>">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">📊</span>
+                <span>Dashboard</span>
+            </div>
+        </a>
+
+        <!-- Kelola Barang Menu -->
+        <a href="../barang/list.php" class="block py-3 px-4 rounded-lg transition-all duration-200 
+            <?= $active_menu == 'barang' ? 'bg-green-50 text-green-700 border-l-4 border-green-500 font-semibold shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' ?>">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">📦</span>
+                <span>Kelola Barang</span>
+            </div>
+        </a>
+
+        <!-- Kelola Kategori Menu (Active) -->
+        <a href="list.php" class="block py-3 px-4 rounded-lg transition-all duration-200 
+            <?= $active_menu == 'kategori' ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-500 font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800' ?>">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">🏷️</span>
+                <span>Kelola Kategori</span>
+            </div>
+        </a>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200 my-2"></div>
+
+        <!-- Logout Menu -->
+        <a href="../logout.php" class="block py-3 px-4 rounded-lg transition-all duration-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">🔓</span>
+                <span>Logout</span>
+            </div>
+        </a>
     </nav>
 </aside>
-
 
 <!-- Main Content -->
 <main class="pt-20 pb-8 px-4 sm:px-6 lg:px-8 sidebar-lg:ml-64 max-w-7xl mx-auto sidebar-lg:max-w-none">
@@ -169,7 +230,6 @@ $result = $conn->query("SELECT * FROM kategori");
         </div>
     </div>
 </main>
-
 
 </body>
 </html>

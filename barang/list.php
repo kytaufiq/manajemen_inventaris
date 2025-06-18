@@ -2,6 +2,39 @@
 require '../auth.php';
 require '../koneksi.php';
 
+if ($_SESSION['role'] != 'admin') {
+    header("Location: ../dashboard_user.php");
+    exit;
+}
+
+// Deteksi halaman aktif berdasarkan nama file atau parameter
+$current_page = basename($_SERVER['PHP_SELF']);
+$active_menu = '';
+
+// Tentukan menu aktif berdasarkan halaman
+switch($current_page) {
+    case 'dashboard_admin.php':
+        $active_menu = 'dashboard';
+        break;
+    case 'list.php':
+        // Cek apakah ini dari folder barang atau kategori
+        if (strpos($_SERVER['REQUEST_URI'], 'barang') !== false) {
+            $active_menu = 'barang';
+        } elseif (strpos($_SERVER['REQUEST_URI'], 'kategori') !== false) {
+            $active_menu = 'kategori';
+        }
+        break;
+    case 'tambah.php':
+    case 'edit.php':
+        // Untuk halaman tambah/edit, cek folder
+        if (strpos($_SERVER['REQUEST_URI'], 'barang') !== false) {
+            $active_menu = 'barang';
+        } elseif (strpos($_SERVER['REQUEST_URI'], 'kategori') !== false) {
+            $active_menu = 'kategori';
+        }
+        break;
+}
+
 $cari = isset($_GET['cari']) ? trim($_GET['cari']) : '';
 
 if ($cari !== '') {
@@ -52,29 +85,69 @@ if ($cari !== '') {
                 </h1>
             </div>
 
-            
             <div class="flex items-center space-x-2 sm:space-x-4">
                 <span class="text-gray-600 text-sm sm:text-base hidden sm:block font-semibold">
                 <?= $_SESSION['username'] ?>
                 </span>
-            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 text-sm font-semibold">
-                <?= strtoupper(substr($_SESSION['username'], 0, 1)) ?><?= strtoupper(explode(' ', $_SESSION['username'])[1][0] ?? '') ?>
+                <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 text-sm font-semibold">
+                    <?= strtoupper(substr($_SESSION['username'], 0, 1)) ?><?= strtoupper(explode(' ', $_SESSION['username'])[1][0] ?? '') ?>
+                </div>
             </div>
-          </div>
         </div>
     </div>
 </header>
 
+<!-- Mobile Menu Button -->
+<button id="mobile-menu-btn" class="fixed top-4 left-4 z-60 sidebar-lg:hidden bg-white p-2 rounded shadow-md">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+</button>
+
 <!-- Sidebar -->
 <aside id="sidebar" class="fixed top-16 left-0 h-full w-64 bg-white border-r shadow-sm z-40 transform -translate-x-full sidebar-lg:translate-x-0 transition-transform duration-300">
     <nav class="mt-4 px-4 space-y-2">
-        <a href="../dashboard_admin.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-gray-800">📊 Dashboard</a>
-        <a href="list.php" class="block py-2 px-4 rounded bg-gray-100 text-green-600">📦 Kelola Barang</a>
-        <a href="../kategori/list.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-green-600">🏷️ Kelola Kategori</a>
-        <a href="../logout.php" class="block py-2 px-4 rounded hover:bg-gray-100 text-red-600">🔓 Logout</a>
+        <!-- Dashboard Menu -->
+        <a href="../dashboard_admin.php" class="block py-3 px-4 rounded-lg transition-all duration-200 
+            <?= $active_menu == 'dashboard' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500 font-semibold shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' ?>">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">📊</span>
+                <span>Dashboard</span>
+            </div>
+        </a>
+        
+        <!-- Kelola Barang Menu -->
+        <a href="list.php" class="block py-3 px-4 rounded-lg transition-all duration-200 
+            <?= $active_menu == 'barang' ? 'bg-green-50 text-green-700 border-l-4 border-green-500 font-semibold shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' ?>">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">📦</span>
+                <span>Kelola Barang</span>
+            </div>
+        </a>
+        
+        <!-- Kelola Kategori Menu -->
+        <a href="../kategori/list.php" class="block py-3 px-4 rounded-lg transition-all duration-200 
+            <?= $active_menu == 'kategori' ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-500 font-semibold shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' ?>">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">🏷️</span>
+                <span>Kelola Kategori</span>
+            </div>
+        </a>
+        
+        <!-- Divider -->
+        <div class="border-t border-gray-200 my-2"></div>
+        
+        <!-- Logout Menu -->
+        <a href="../logout.php" class="block py-3 px-4 rounded-lg transition-all duration-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">🔓</span>
+                <span>Logout</span>
+            </div>
+        </a>
     </nav>
 </aside>
 
+<div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden sidebar-lg:hidden"></div>
 
 <!-- Main Content -->
 <main class="pt-20 pb-8 px-4 sm:px-6 lg:px-8 sidebar-lg:ml-64 max-w-7xl mx-auto sidebar-lg:max-w-none">
