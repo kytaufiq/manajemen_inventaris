@@ -59,37 +59,366 @@ if ($cari !== '') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barangku - Kelola Barang</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    screens: {
-                        'sidebar-lg': '1024px',
-                    }
-                }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 264px;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        /* Header Styles */
+        .header-gradient {
+            background: linear-gradient(135deg, #fbbf24 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .header-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            height: calc(100vh - 64px);
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #e9ecef;
+            box-shadow: 1px 0 3px rgba(0,0,0,0.1);
+            z-index: 1040;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.show {
+            transform: translateX(0);
+        }
+        
+        @media (min-width: 1024px) {
+            .sidebar {
+                transform: translateX(0);
             }
         }
-    </script>
+        
+        .sidebar-nav .nav-link {
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 8px;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-nav .nav-link:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+        
+        .sidebar-nav .nav-link.active.dashboard {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border-left: 4px solid #3b82f6;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-nav .nav-link.active.barang {
+            background-color: #f0fdf4;
+            color: #166534;
+            border-left: 4px solid #22c55e;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-nav .nav-link.active.kategori {
+            background-color: #faf5ff;
+            color: #7c2d12;
+            border-left: 4px solid #a855f7;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-nav .nav-link.logout {
+            color: #dc2626;
+        }
+        
+        .sidebar-nav .nav-link.logout:hover {
+            background-color: #fef2f2;
+            color: #b91c1c;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding-top: 80px;
+            padding-bottom: 32px;
+            transition: margin-left 0.3s ease;
+        }
+        
+        @media (min-width: 1024px) {
+            .main-content {
+                margin-left: var(--sidebar-width);
+            }
+        }
+        
+        /* Overlay */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1030;
+            display: none;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        @media (min-width: 1024px) {
+            .sidebar-overlay {
+                display: none !important;
+            }
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb-nav {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .breadcrumb-nav a {
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-nav a:hover {
+            color: #374151;
+        }
+        
+        .breadcrumb-nav .active {
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        /* Stock Status */
+        .stock-low {
+            color: #dc2626 !important;
+            font-weight: 600;
+        }
+        
+        .stock-limited {
+            color: #d97706 !important;
+            font-weight: 500;
+        }
+        
+        .stock-good {
+            color: #16a34a;
+        }
+        
+        .stock-label {
+            font-size: 0.75rem;
+            margin-left: 4px;
+        }
+        
+        /* Avatar */
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        /* Button Styles */
+        .btn-search {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-search:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+        
+        .btn-add {
+            background-color: #22c55e;
+            border-color: #22c55e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-add:hover {
+            background-color: #16a34a;
+            border-color: #16a34a;
+            color: white;
+        }
+        
+        .btn-edit {
+            background-color: #eab308;
+            border-color: #eab308;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-edit:hover {
+            background-color: #ca8a04;
+            border-color: #ca8a04;
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: #ef4444;
+            border-color: #ef4444;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-delete:hover {
+            background-color: #dc2626;
+            border-color: #dc2626;
+            color: white;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            padding: 48px 16px;
+            text-align: center;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            color: #d1d5db;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state h5 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+        
+        .empty-state p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+        
+        /* Search Input */
+        .search-input {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.875rem;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Table Styles */
+        .table th {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 12px 16px;
+        }
+        
+        .table td {
+            padding: 16px;
+            font-size: 0.875rem;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        /* Category Badge */
+        .category-badge {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body>
 
 <!-- Header -->
-<header class="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
-    <div class="px-4 sm:px-6 py-4">
-        <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <img src="../img/logo.png" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-full shadow" />
-                <h1 class="text-xl sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-pink-500 drop-shadow-sm tracking-wide">
-                    Barangku
-                </h1>
+<header class="header-fixed">
+    <div class="container-fluid px-3 px-sm-4 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link d-lg-none p-0 me-3" id="sidebarToggle" type="button">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <img src="../img/logo.png" alt="Logo" class="rounded-circle shadow" style="width: 32px; height: 32px; object-fit: contain;" />
+                <h1 class="header-gradient fs-4 fs-sm-3 mb-0 ms-3">Barangku</h1>
             </div>
 
-            <div class="flex items-center space-x-2 sm:space-x-4">
-                <span class="text-gray-600 text-sm sm:text-base hidden sm:block font-semibold">
-                <?= $_SESSION['username'] ?>
+            <div class="d-flex align-items-center">
+                <span class="text-muted fw-semibold d-none d-sm-block me-3">
+                    <?= $_SESSION['username'] ?>
                 </span>
-                <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 text-sm font-semibold">
+                <div class="user-avatar">
                     <?= strtoupper(substr($_SESSION['username'], 0, 1)) ?><?= strtoupper(explode(' ', $_SESSION['username'])[1][0] ?? '') ?>
                 </div>
             </div>
@@ -97,221 +426,174 @@ if ($cari !== '') {
     </div>
 </header>
 
-<!-- Mobile Menu Button -->
-<button id="mobile-menu-btn" class="fixed top-4 left-4 z-60 sidebar-lg:hidden bg-white p-2 rounded shadow-md">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-    </svg>
-</button>
-
 <!-- Sidebar -->
-<aside id="sidebar" class="fixed top-16 left-0 h-full w-64 bg-white border-r shadow-sm z-40 transform -translate-x-full sidebar-lg:translate-x-0 transition-transform duration-300">
-    <nav class="mt-4 px-4 space-y-2">
+<aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav p-3">
         <!-- Dashboard Menu -->
-        <a href="../dashboard_admin.php" class="block py-3 px-4 rounded-lg transition-all duration-200 
-            <?= $active_menu == 'dashboard' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500 font-semibold shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' ?>">
-            <div class="flex items-center space-x-3">
-                <span class="text-lg">📊</span>
-                <span>Dashboard</span>
-            </div>
+        <a href="../dashboard_admin.php" class="nav-link <?= $active_menu == 'dashboard' ? 'active dashboard' : '' ?>">
+            <span style="font-size: 18px;">📊</span>
+            <span>Dashboard</span>
         </a>
         
         <!-- Kelola Barang Menu -->
-        <a href="list.php" class="block py-3 px-4 rounded-lg transition-all duration-200 
-            <?= $active_menu == 'barang' ? 'bg-green-50 text-green-700 border-l-4 border-green-500 font-semibold shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' ?>">
-            <div class="flex items-center space-x-3">
-                <span class="text-lg">📦</span>
-                <span>Kelola Barang</span>
-            </div>
+        <a href="list.php" class="nav-link <?= $active_menu == 'barang' ? 'active barang' : '' ?>">
+            <span style="font-size: 18px;">📦</span>
+            <span>Kelola Barang</span>
         </a>
         
         <!-- Kelola Kategori Menu -->
-        <a href="../kategori/list.php" class="block py-3 px-4 rounded-lg transition-all duration-200 
-            <?= $active_menu == 'kategori' ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-500 font-semibold shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' ?>">
-            <div class="flex items-center space-x-3">
-                <span class="text-lg">🏷️</span>
-                <span>Kelola Kategori</span>
-            </div>
+        <a href="../kategori/list.php" class="nav-link <?= $active_menu == 'kategori' ? 'active kategori' : '' ?>">
+            <span style="font-size: 18px;">🏷️</span>
+            <span>Kelola Kategori</span>
         </a>
-        
+
         <!-- Divider -->
-        <div class="border-t border-gray-200 my-2"></div>
+        <hr class="my-3">
         
         <!-- Logout Menu -->
-        <a href="../logout.php" class="block py-3 px-4 rounded-lg transition-all duration-200 text-red-600 hover:bg-red-50 hover:text-red-700">
-            <div class="flex items-center space-x-3">
-                <span class="text-lg">🔓</span>
-                <span>Logout</span>
-            </div>
+        <a href="../logout.php" class="nav-link logout">
+            <span style="font-size: 18px;">🔓</span>
+            <span>Logout</span>
         </a>
     </nav>
 </aside>
 
-<div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden sidebar-lg:hidden"></div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <!-- Main Content -->
-<main class="pt-20 pb-8 px-4 sm:px-6 lg:px-8 sidebar-lg:ml-64 max-w-7xl mx-auto sidebar-lg:max-w-none">
-    <!-- Page Header -->
-    <div class="mb-6 sm:mb-8">
-        <div class="flex items-center space-x-2 text-sm text-gray-500 mb-2">
-            <a href="../dashboard_admin.php" class="hover:text-gray-700">Dashboard</a>
-            <span>›</span>
-            <span class="text-gray-700 font-medium">Kelola Barang</span>
-        </div>
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Data Barang</h2>
-        <p class="text-sm sm:text-base text-gray-500">Kelola dan pantau inventori barang Anda</p>
-    </div>
-
-    <!-- Content Card -->
-    <div class="bg-white rounded-lg shadow-sm border">
-        <!-- Card Header dengan Search dan Tombol Tambah -->
-        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <!-- Form Pencarian -->
-                <form method="get" class="flex-1 max-w-md">
-                    <div class="flex gap-2">
-                        <input type="text" name="cari"
-                               placeholder="Cari nama barang..."
-                               value="<?= htmlspecialchars($cari) ?>"
-                               class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <button type="submit"
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Tombol Tambah  -->
-                <?php if ($_SESSION['role'] == 'admin'): ?>
-                    <a href="tambah.php"
-                       class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Tambah Barang
-                    </a>
-                <?php endif; ?>
+<main class="main-content">
+    <div class="container-fluid px-3 px-sm-4 px-lg-5" style="max-width: none;">
+        <!-- Page Header -->
+        <div class="mb-4 mb-sm-5">
+            <div class="breadcrumb-nav mb-2">
+                <a href="../dashboard_admin.php">Dashboard</a>
+                <span class="mx-2">›</span>
+                <span class="active">Kelola Barang</span>
             </div>
+            <h2 class="fs-4 fs-sm-3 fw-bold text-dark mb-2">Data Barang</h2>
+            <p class="text-muted mb-0">Kelola dan pantau inventori barang Anda</p>
         </div>
 
-        <!-- Table Content -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            No
-                        </th>
-                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nama Barang
-                        </th>
-                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Kategori
-                        </th>
-                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Stok
-                        </th>
-                        <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Harga
-                        </th>
-                        <?php if ($_SESSION['role'] == 'admin'): ?>
-                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Aksi
-                            </th>
-                        <?php endif; ?>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <?php if ($result->num_rows > 0): ?>
-                        <?php $no = 1; while ($row = $result->fetch_assoc()): ?>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <?= $no++ ?>
-                                </td>
-                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($row['nama_barang']) ?></div>
-                                </td>
-                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <?= htmlspecialchars($row['nama_kategori'] ?? 'Tanpa Kategori') ?>
-                                    </span>
-                                </td>
-                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm 
-                                        <?= $row['stok'] <= 10 ? 'text-red-600 font-semibold' : ($row['stok'] <= 20 ? 'text-yellow-600 font-medium' : 'text-green-600') ?>">
-                                        <?= htmlspecialchars($row['stok']) ?>
-                                        <?php if ($row['stok'] <= 10): ?>
-                                            <span class="text-xs text-red-500 ml-1">(Rendah)</span>
-                                        <?php elseif ($row['stok'] <= 20): ?>
-                                            <span class="text-xs text-yellow-500 ml-1">(Terbatas)</span>
-                                        <?php endif; ?>
-                                    </span>
-                                </td>
-                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    Rp <?= number_format($row['harga'], 0, ',', '.') ?>
-                                </td>
+        <!-- Content Card -->
+        <div class="card border-0 shadow-sm">
+            <!-- Card Header dengan Search dan Tombol Tambah -->
+            <div class="card-header bg-white border-bottom py-3">
+                <div class="row align-items-center g-3">
+                    <!-- Form Pencarian -->
+                    <div class="col-12 col-sm-8 col-md-6">
+                        <form method="get" class="d-flex gap-2">
+                            <input type="text" name="cari" 
+                                   placeholder="Cari nama barang..." 
+                                   value="<?= htmlspecialchars($cari) ?>" 
+                                   class="form-control search-input">
+                            <button type="submit" class="btn btn-search">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tombol Tambah -->
+                    <?php if ($_SESSION['role'] == 'admin'): ?>
+                        <div class="col-12 col-sm-4 col-md-6 text-end">
+                            <a href="tambah.php" class="btn btn-add d-inline-flex align-items-center gap-2">
+                                <i class="bi bi-plus"></i>
+                                Tambah Barang
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Table Content -->
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Barang</th>
+                                <th>Kategori</th>
+                                <th>Stok</th>
+                                <th>Harga</th>
                                 <?php if ($_SESSION['role'] == 'admin'): ?>
-                                    <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm">
-                                        <div class="flex items-center space-x-2">
-                                            <a href="edit.php?id=<?= $row['id'] ?>"
-                                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors">
-                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                </svg>
-                                                Edit
-                                            </a>
-                                            <a href="hapus.php?id=<?= $row['id'] ?>"
-                                               onclick="return confirm('Yakin ingin menghapus barang ini?')"
-                                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
-                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                </svg>
-                                                Hapus
-                                            </a>
-                                        </div>
-                                    </td>
+                                    <th>Aksi</th>
                                 <?php endif; ?>
                             </tr>
-                        <?php endwhile; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="<?= $_SESSION['role'] == 'admin' ? '6' : '5' ?>" class="px-4 sm:px-6 py-12 text-center">
-                                <div class="flex flex-col items-center">
-                                    <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                    </svg>
-                                    <h3 class="text-sm font-medium text-gray-900 mb-1">
-                                        <?= $cari !== '' ? 'Tidak ada hasil pencarian' : 'Belum ada barang' ?>
-                                    </h3>
-                                    <p class="text-sm text-gray-500 mb-4">
-                                        <?= $cari !== '' ? "Tidak ditemukan barang dengan kata kunci '{$cari}'" : 'Mulai dengan menambahkan barang pertama Anda' ?>
-                                    </p>
-                                    <?php if ($_SESSION['role'] == 'admin'): ?>
-                                        <?php if ($cari !== ''): ?>
-                                            <a href="list.php" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                                ← Kembali ke daftar barang
-                                            </a>
-                                        <?php else: ?>
-                                            <a href="tambah.php" class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                                </svg>
-                                                Tambah Barang Pertama
-                                            </a>
+                        </thead>
+                        <tbody>
+                            <?php if ($result->num_rows > 0): ?>
+                                <?php $no = 1; while ($row = $result->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?= $no++ ?></td>
+                                        <td>
+                                            <div class="fw-medium text-dark"><?= htmlspecialchars($row['nama_barang']) ?></div>
+                                        </td>
+                                        <td>
+                                            <span class="category-badge">
+                                                <?= htmlspecialchars($row['nama_kategori'] ?? 'Tanpa Kategori') ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="<?= $row['stok'] <= 10 ? 'stock-low' : ($row['stok'] <= 20 ? 'stock-limited' : 'stock-good') ?>">
+                                                <?= htmlspecialchars($row['stok']) ?>
+                                                <?php if ($row['stok'] <= 10): ?>
+                                                    <span class="stock-label text-danger">(Rendah)</span>
+                                                <?php elseif ($row['stok'] <= 20): ?>
+                                                    <span class="stock-label text-warning">(Terbatas)</span>
+                                                <?php endif; ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            Rp <?= number_format($row['harga'], 0, ',', '.') ?>
+                                        </td>
+                                        <?php if ($_SESSION['role'] == 'admin'): ?>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <a href="edit.php?id=<?= $row['id'] ?>" class="btn-edit">
+                                                        <i class="bi bi-pencil" style="font-size: 12px;"></i>
+                                                        Edit
+                                                    </a>
+                                                    <a href="hapus.php?id=<?= $row['id'] ?>" 
+                                                       onclick="return confirm('Yakin ingin menghapus barang ini?')" 
+                                                       class="btn-delete">
+                                                        <i class="bi bi-trash" style="font-size: 12px;"></i>
+                                                        Hapus
+                                                    </a>
+                                                </div>
+                                            </td>
                                         <?php endif; ?>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="<?= $_SESSION['role'] == 'admin' ? '6' : '5' ?>" class="empty-state">
+                                        <i class="bi bi-box"></i>
+                                        <h5><?= $cari !== '' ? 'Tidak ada hasil pencarian' : 'Belum ada barang' ?></h5>
+                                        <p><?= $cari !== '' ? "Tidak ditemukan barang dengan kata kunci '{$cari}'" : 'Mulai dengan menambahkan barang pertama Anda' ?></p>
+                                        <?php if ($_SESSION['role'] == 'admin'): ?>
+                                            <?php if ($cari !== ''): ?>
+                                                <a href="list.php" class="text-primary text-decoration-none fw-medium">
+                                                    ← Kembali ke daftar barang
+                                                </a>
+                                            <?php else: ?>
+                                                <a href="tambah.php" class="btn btn-add d-inline-flex align-items-center gap-2">
+                                                    <i class="bi bi-plus"></i>
+                                                    Tambah Barang Pertama
+                                                </a>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
